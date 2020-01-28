@@ -13,7 +13,7 @@ router.post('/login', (req, res) => {
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
-        
+        req.session.user = user;
         res
           .status(200)
           .json({ message: `Welcome ${user.username}! eat this cookie` });
@@ -47,5 +47,19 @@ router.get('/users', restricted, (req, res) => {
       })
       .catch(err => res.send(err));
 });
+
+router.get('/logout', (req, res) => {
+  if(req.session) {
+    req.session.destroy(err => {
+      if (err) {
+        res.json({ message: 'Error while logging out' })
+      } else {
+        res.status(200).json({ message: 'User logout successful' })
+      }
+    })
+  } else {
+    res.status(200).json({ message: 'User was never logged in' })
+  }
+})
 
 module.exports = router;
